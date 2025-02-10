@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import dbData from "@/db.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const ShoppingImage = require("@/assets/images/access.jpg");
 interface WareHouseman {
@@ -30,9 +30,10 @@ const Authenticate = () => {
       return;
     }
     try {
-      const warehousemans = dbData.warehousemans;
-
-      const warehouseman = warehousemans.find(
+      const warehousemans = await axios.get(
+        "http://192.168.1.3:3000/warehousemans"
+      );
+      const warehouseman = warehousemans.data.find(
         (man: WareHouseman) => man.secretKey === secretKey
       );
       if (warehouseman) {
