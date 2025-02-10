@@ -1,74 +1,101 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  ImageBackground,
+  TextInput,
+  TouchableOpacity,
+  Text,
+} from "react-native";
+import dbData from "@/db.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+const ShoppingImage = require("@/assets/images/access.jpg");
+interface WareHouseman {
+  secretKey: string;
 }
+const Authenticate = () => {
+  const [secretKey, setSecretKey] = useState("");
+  const [message, setMessage] = useState<{
+    text: string;
+    color: string;
+  } | null>(null);
+  const router = useRouter();
+  const handleAuthenticate = async () => {
+    if (!secretKey.trim()) {
+      setMessage({
+        text: "Secret Key cannot be empty!",
+        color: "text-red-500",
+      });
+      return;
+    }
+    try {
+      const warehousemans = dbData.warehousemans;
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+      const warehouseman = warehousemans.find(
+        (man: WareHouseman) => man.secretKey === secretKey
+      );
+      if (warehouseman) {
+        await AsyncStorage.setItem("userSecretKey", secretKey);
+        setMessage({
+          text: "Login successful! Redirecting...",
+          color: "text-green-500",
+        });
+
+        setTimeout(() => {
+          router.push("/(products)/products");
+        }, 1500);
+      } else {
+        setMessage({
+          text: "Invalid secret key, please try again.",
+          color: "text-red-500",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setMessage({
+        text: "An error occurred, please try again.",
+        color: "text-red-500",
+      });
+    }
+  };
+
+  return (
+    <ImageBackground
+      source={ShoppingImage}
+      className="w-full h-full"
+      blurRadius={4}
+    >
+      <View className="flex-1 items-center justify-center px-4">
+        <View className="border-2 border-red-700 rounded-xl p-8 w-full bg-white/75 shadow-lg">
+          <Text className="text-xl font-semibold mb-4 text-center text-gray-800">
+            Enter Your Secret Key to Login
+          </Text>
+          <TextInput
+            placeholder="Ex: secret_key_example_123"
+            placeholderTextColor="#888"
+            className="bg-white/80 p-4 rounded-lg mb-4 text-base border border-gray-200"
+            value={secretKey}
+            onChangeText={(text) => {
+              setSecretKey(text);
+              setMessage(null);
+            }}
+          />
+          {message && (
+            <Text className={`text-center mb-4 text-base ${message.color}`}>
+              {message.text}
+            </Text>
+          )}
+          <TouchableOpacity
+            className="bg-red-500 rounded-lg p-4 items-center active:bg-red-900 transition-colors"
+            onPress={handleAuthenticate}
+          >
+            <Text className="text-white font-bold text-base">Validate</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
+
+export default Authenticate;
