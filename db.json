@@ -90,6 +90,34 @@
           "at": "2025-02-02"
         }
       ]
+    },
+    {
+      "id": 4,
+      "name": "Samsung Galaxy S24 Ultra",
+      "type": "Smartphones",
+      "barcode": "8806094835823",
+      "price": 14999,
+      "solde": 13999,
+      "supplier": "Samsung",
+      "image": "https://mediazone.ma/uploads/images/products/16412/landing-page/assets/images/swiper-1.png",
+      "stocks": [
+        {
+          "id": 1999,
+          "name": "Gueliz B2",
+          "quantity": 100,
+          "localisation": {
+            "city": "Marrakesh",
+            "latitude": 31.628674,
+            "longitude": -7.992047
+          }
+        }
+      ],
+      "editedBy": [
+        {
+          "warehousemanId": 1444,
+          "at": "2025-02-11"
+        }
+      ]
     }
   ],
   "warehousemans": [

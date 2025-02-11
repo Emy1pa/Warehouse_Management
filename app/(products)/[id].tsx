@@ -52,7 +52,7 @@ const ProductDetails = () => {
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
-        const response = await axios.get("http://192.168.1.3:3000/products");
+        const response = await axios.get("http://192.168.8.194:3000/products");
         const foundProduct = response.data.find(
           (p: Product) => p.id === parseInt(params.id as string)
         );
