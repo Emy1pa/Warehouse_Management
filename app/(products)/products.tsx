@@ -42,7 +42,7 @@ const ProductsList = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://192.168.1.3:3000/products");
+      const response = await axios.get("http://192.168.8.194:3000/products");
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);

@@ -31,7 +31,7 @@ const Authenticate = () => {
     }
     try {
       const warehousemans = await axios.get(
-        "http://192.168.1.3:3000/warehousemans"
+        "http://192.168.8.194:3000/warehousemans"
       );
       const warehouseman = warehousemans.data.find(
         (man: WareHouseman) => man.secretKey === secretKey
