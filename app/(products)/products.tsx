@@ -4,9 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import axios from "axios";
+import FilterSortUtils from "./SearchAndSort";
 const ShoppingImage = require("@/assets/images/access.jpg");
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   type: string;
@@ -20,6 +21,7 @@ const ProductsList = () => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,6 +35,10 @@ const ProductsList = () => {
     };
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
 
   const fetchProducts = async () => {
     try {
@@ -74,12 +80,15 @@ const ProductsList = () => {
               <Text className="text-white font-semibold">Déconnexion</Text>
             </TouchableOpacity>
           </View>
-
+          <FilterSortUtils
+            products={products}
+            onFilteredProducts={setFilteredProducts}
+          />
           <ScrollView
             className="flex-1 pt- px-2"
             contentContainerStyle={{ gap: 12 }}
           >
-            {products.map((item) => {
+            {filteredProducts.map((item) => {
               const totalStock = item.stocks.reduce(
                 (total, stock) => total + stock.quantity,
                 0
