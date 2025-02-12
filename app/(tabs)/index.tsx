@@ -7,13 +7,9 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-
+import { authenticateUser } from "../services/authService";
 const ShoppingImage = require("@/assets/images/access.jpg");
-interface WareHouseman {
-  secretKey: string;
-}
+
 const Authenticate = () => {
   const [secretKey, setSecretKey] = useState("");
   const [message, setMessage] = useState<{
@@ -21,45 +17,6 @@ const Authenticate = () => {
     color: string;
   } | null>(null);
   const router = useRouter();
-  const handleAuthenticate = async () => {
-    if (!secretKey.trim()) {
-      setMessage({
-        text: "Secret Key cannot be empty!",
-        color: "text-red-500",
-      });
-      return;
-    }
-    try {
-      const warehousemans = await axios.get(
-        "http://192.168.8.194:3000/warehousemans"
-      );
-      const warehouseman = warehousemans.data.find(
-        (man: WareHouseman) => man.secretKey === secretKey
-      );
-      if (warehouseman) {
-        await AsyncStorage.setItem("userSecretKey", secretKey);
-        setMessage({
-          text: "Login successful! Redirecting...",
-          color: "text-green-500",
-        });
-
-        setTimeout(() => {
-          router.push("/(products)/products");
-        }, 1500);
-      } else {
-        setMessage({
-          text: "Invalid secret key, please try again.",
-          color: "text-red-500",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setMessage({
-        text: "An error occurred, please try again.",
-        color: "text-red-500",
-      });
-    }
-  };
 
   return (
     <ImageBackground
@@ -89,7 +46,9 @@ const Authenticate = () => {
           )}
           <TouchableOpacity
             className="bg-red-500 rounded-lg p-4 items-center active:bg-red-900 transition-colors"
-            onPress={handleAuthenticate}
+            onPress={() => {
+              authenticateUser(secretKey, setMessage, router);
+            }}
           >
             <Text className="text-white font-bold text-base">Validate</Text>
           </TouchableOpacity>

@@ -1,7 +1,7 @@
 {
   "products": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Laptop HP Pavilion",
       "type": "Informatique",
       "barcode": "1234567890123",
@@ -39,7 +39,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Clavier Mécanique Logitech",
       "type": "Accessoires",
       "barcode": "9876543210987",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Pc Gamer Omen By HP",
       "type": "Informatique",
       "barcode": "1236543210987",
@@ -92,19 +92,18 @@
       ]
     },
     {
-      "id": 4,
-      "name": "Samsung Galaxy S24 Ultra",
-      "type": "Smartphones",
-      "barcode": "8806094835823",
-      "price": 14999,
-      "solde": 13999,
-      "supplier": "Samsung",
-      "image": "https://mediazone.ma/uploads/images/products/16412/landing-page/assets/images/swiper-1.png",
+      "id": "4",
+      "name": "Ghhh",
+      "type": "Information",
+      "barcode": "66677777",
+      "price": 500,
+      "supplier": "Hp",
+      "image": "Yyyyy",
       "stocks": [
         {
           "id": 1999,
           "name": "Gueliz B2",
-          "quantity": 100,
+          "quantity": 20,
           "localisation": {
             "city": "Marrakesh",
             "latitude": 31.628674,
@@ -115,7 +114,7 @@
       "editedBy": [
         {
           "warehousemanId": 1444,
-          "at": "2025-02-11"
+          "at": "2025-02-12"
         }
       ]
     }

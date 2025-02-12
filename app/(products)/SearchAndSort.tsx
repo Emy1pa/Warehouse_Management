@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TextInput, TouchableOpacity, Text } from "react-native";
-import { Product } from "./products";
+import { Product } from "../utils/interface";
 
 interface FilterSortUtilsProps {
   products: Product[];

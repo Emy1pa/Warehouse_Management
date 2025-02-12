@@ -12,65 +12,48 @@ import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { format } from "date-fns";
 import { Feather } from "@expo/vector-icons";
 import axios from "axios";
-
-interface Localisation {
-  city: string;
-  latitude: number;
-  longitude: number;
-}
-
-interface Stock {
-  id: number;
-  name: string;
-  quantity: number;
-  localisation: Localisation;
-}
-
-interface EditHistory {
-  warehousemanId: number;
-  at: string;
-}
-
-interface Product {
-  id: number;
-  name: string;
-  type: string;
-  barcode: string;
-  price: number;
-  solde?: number;
-  supplier: string;
-  image: string;
-  stocks: Stock[];
-  editedBy: EditHistory[];
-}
+import { DProduct } from "../utils/interface";
+import { fetchProductDetails } from "../services/productService";
 
 const ProductDetails = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<DProduct | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
+  const getProductDetails = async () => {
+    try {
+      const response = await fetchProductDetails(parseInt(params.id as string));
+      setProduct(response);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
+  };
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      try {
-        const response = await axios.get("http://192.168.8.194:3000/products");
-        const foundProduct = response.data.find(
-          (p: Product) => p.id === parseInt(params.id as string)
-        );
-        if (foundProduct) setProduct(foundProduct);
-      } catch (error) {
-        console.error("Error fetching product details:", error);
-      }
-    };
-    fetchProductDetails();
+    console.log(params.id);
+    getProductDetails();
   }, [params.id]);
-
-  if (!product) return null;
 
   const openMapsLocation = (latitude: number, longitude: number) => {
     const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
     Linking.openURL(url);
   };
 
+  if (!product) {
+    return (
+      <SafeAreaView className="flex-1">
+        <View className="flex-1 justify-center items-center">
+          <Text>Produit non trouvé</Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mt-4 bg-blue-500 px-4 py-2 rounded-lg"
+          >
+            <Text className="text-white">Retour</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
   return (
     <View className="flex-1 bg-gray-50">
       <Stack.Screen options={{ headerShown: false }} />
@@ -159,6 +142,26 @@ const ProductDetails = () => {
                     {stock.localisation.city}
                   </Text>
                 </TouchableOpacity>
+                <View className="flex-row justify-between mt-4">
+                  <TouchableOpacity
+                    onPress={() => console.log("hi")}
+                    className="bg-green-500 px-4 py-2 rounded-lg flex-1 mr-2"
+                  >
+                    <Text className="text-white text-center">
+                      Réapprovisionner
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => console.log("hi")}
+                    disabled={stock.quantity === 0}
+                    className={`px-4 py-2 rounded-lg flex-1 ml-2 ${
+                      stock.quantity === 0 ? "bg-gray-400" : "bg-red-500"
+                    }`}
+                  >
+                    <Text className="text-white text-center">Décharger</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             ))}
           </View>

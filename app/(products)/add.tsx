@@ -10,6 +10,7 @@ import {
   FlatList,
 } from "react-native";
 import axios from "axios";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ProductForm {
   name: string;
@@ -97,7 +98,7 @@ export default function AddProductScreen() {
     }
 
     try {
-      const response = await axios.get("http://192.168.8.194:3000/products");
+      const response = await axios.get("http://192.168.8.162:3000/products");
       const products = response.data;
       const nextId = Math.max(...products.map((p: any) => p.id)) + 1;
 
@@ -132,7 +133,7 @@ export default function AddProductScreen() {
         ],
       };
 
-      await axios.post("http://192.168.8.194:3000/products", newProduct);
+      await axios.post("http://192.168.8.162:3000/products", newProduct);
       Alert.alert("Success", `Product "${formData.name}" added successfully!`);
 
       setFormData({
@@ -154,7 +155,7 @@ export default function AddProductScreen() {
 
   return (
     <ScrollView className="flex-1 bg-gray-100">
-      <View className="p-5">
+      <View className="p-5 mt-8">
         <Text className="text-2xl font-bold text-center mb-5">
           🛒 Add New Product
         </Text>
