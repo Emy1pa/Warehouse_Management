@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams, Stack } from "expo-router";
@@ -14,12 +15,15 @@ import { Feather } from "@expo/vector-icons";
 import axios from "axios";
 import { DProduct } from "../utils/interface";
 import { fetchProductDetails } from "../services/productService";
+import { apiUrl } from "../utils/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProductDetails = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [product, setProduct] = useState<DProduct | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   const getProductDetails = async () => {
     try {
@@ -30,13 +34,85 @@ const ProductDetails = () => {
     }
   };
   useEffect(() => {
-    console.log(params.id);
+    console.log(params.id as string);
     getProductDetails();
+    getCurrentUser();
   }, [params.id]);
 
   const openMapsLocation = (latitude: number, longitude: number) => {
     const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
     Linking.openURL(url);
+  };
+  const handleStockUpdate = async (
+    stockId: number,
+    action: "increase" | "decrease"
+  ) => {
+    if (!product) return;
+
+    setIsLoading(true);
+    try {
+      const stockToUpdate = product.stocks.find(
+        (stock) => stock.id === stockId
+      );
+      if (!stockToUpdate) {
+        throw new Error("Stock not found");
+      }
+
+      const newQuantity =
+        action === "increase"
+          ? stockToUpdate.quantity + 1
+          : stockToUpdate.quantity - 1;
+
+      if (newQuantity < 0) {
+        Alert.alert("Erreur", "La quantité ne peut pas être négative");
+        return;
+      }
+
+      const updatedProduct: DProduct = {
+        ...product,
+        stocks: product.stocks.map((stock) =>
+          stock.id === stockId ? { ...stock, quantity: newQuantity } : stock
+        ),
+        editedBy: [
+          {
+            warehousemanId: currentUserId,
+            at: new Date().toISOString().split("T")[0],
+          },
+          ...product.editedBy,
+        ],
+      };
+
+      await axios.put(`${apiUrl}/products/${product.id}`, updatedProduct);
+      setProduct(updatedProduct);
+      Alert.alert("Succès", "Stock mis à jour avec succès");
+    } catch (error) {
+      Alert.alert("Erreur", "Impossible de mettre à jour le stock");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const getCurrentUser = async () => {
+    try {
+      const userSecretKey = await AsyncStorage.getItem("userSecretKey");
+      if (userSecretKey) {
+        setCurrentUserId(userSecretKey);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const renderEditHistory = () => {
+    return product?.editedBy.map((edit, index) => (
+      <View key={index} className="flex-row justify-between py-2">
+        <Text className="text-gray-600">
+          Agent #{edit.warehousemanId.toString()}
+        </Text>
+        <Text className="text-gray-600">
+          {format(new Date(edit.at), "dd/MM/yyyy")}
+        </Text>
+      </View>
+    ));
   };
 
   if (!product) {
@@ -144,7 +220,7 @@ const ProductDetails = () => {
                 </TouchableOpacity>
                 <View className="flex-row justify-between mt-4">
                   <TouchableOpacity
-                    onPress={() => console.log("hi")}
+                    onPress={() => handleStockUpdate(stock.id, "increase")}
                     className="bg-green-500 px-4 py-2 rounded-lg flex-1 mr-2"
                   >
                     <Text className="text-white text-center">
@@ -153,7 +229,7 @@ const ProductDetails = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => console.log("hi")}
+                    onPress={() => handleStockUpdate(stock.id, "decrease")}
                     disabled={stock.quantity === 0}
                     className={`px-4 py-2 rounded-lg flex-1 ml-2 ${
                       stock.quantity === 0 ? "bg-gray-400" : "bg-red-500"
@@ -170,16 +246,8 @@ const ProductDetails = () => {
             <Text className="text-lg font-semibold mb-4">
               Historique des Modifications
             </Text>
-            {product.editedBy.map((edit, index) => (
-              <View key={index} className="flex-row justify-between py-2">
-                <Text className="text-gray-600">
-                  Agent #{edit.warehousemanId}
-                </Text>
-                <Text className="text-gray-600">
-                  {format(new Date(edit.at), "dd/MM/yyyy")}
-                </Text>
-              </View>
-            ))}
+
+            {renderEditHistory()}
           </View>
         </ScrollView>
       </SafeAreaView>

@@ -33,10 +33,32 @@
       ],
       "editedBy": [
         {
+          "warehousemanId": "AH90907J",
+          "at": "2025-02-12"
+        },
+        {
+          "warehousemanId": "AH90907J",
+          "at": "2025-02-12"
+        },
+        {
+          "warehousemanId": 1333,
+          "at": "2025-02-12"
+        },
+        {
+          "warehousemanId": [
+            {
+              "warehousemanId": 1333,
+              "at": "2025-02-02"
+            }
+          ],
+          "at": "2025-02-12"
+        },
+        {
           "warehousemanId": 1333,
           "at": "2025-02-02"
         }
-      ]
+      ],
+      "quantity": 22
     },
     {
       "id": "2",
@@ -121,7 +143,7 @@
   ],
   "warehousemans": [
     {
-      "id": 1333,
+      "id": "1333",
       "name": "Amine Boutaleb",
       "dob": "1988-05-02",
       "city": "Oujda",
@@ -129,7 +151,7 @@
       "warehouseId": 1999
     },
     {
-      "id": 1444,
+      "id": "1444",
       "name": "Karim El Mansouri",
       "dob": "1990-09-15",
       "city": "Marrakesh",

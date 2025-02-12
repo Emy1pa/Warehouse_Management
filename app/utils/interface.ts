@@ -22,12 +22,11 @@ export interface Stock {
 }
 
 export interface EditHistory {
-  warehousemanId: number;
+  warehousemanId: string;
   at: string;
 }
-
 export interface DProduct {
-  id: number;
+  id: string;
   name: string;
   type: string;
   barcode: string;
@@ -35,6 +34,17 @@ export interface DProduct {
   solde?: number;
   supplier: string;
   image: string;
-  stocks: Stock[];
+  stocks: {
+    id: number;
+    name: string;
+    quantity: number;
+    localisation: {
+      city: string;
+      latitude: number;
+      longitude: number;
+    };
+  }[];
   editedBy: EditHistory[];
+
+  quantity: number;
 }
