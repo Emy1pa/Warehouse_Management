@@ -20,11 +20,16 @@ export const fetchProductDetails = async (id: number): Promise<DProduct> => {
     throw error;
   }
 };
-export const updateProductStock = async (updatedProducts: DProduct) => {
+export const updateProductStock = async (
+  productId: number,
+  newQuantity: number
+) => {
   try {
-    await axios.post(`${apiUrl}/products`, updatedProducts);
+    await axios.patch(`${apiUrl}/products/${productId}`, {
+      quantity: newQuantity,
+    });
   } catch (error) {
-    console.error("Error on updating the product:", error);
+    console.error("Erreur lors de la mise à jour du stock:", error);
     throw error;
   }
 };
