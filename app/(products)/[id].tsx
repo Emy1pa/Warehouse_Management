@@ -16,7 +16,8 @@ import axios from "axios";
 import { DProduct } from "../utils/interface";
 import { fetchProductDetails } from "../services/productService";
 import { apiUrl } from "../utils/constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ProductPDFGenerator } from "@/components/products/ProductPDFGenerator";
+import useAuth from "../services/useAuth";
 
 const ProductDetails = () => {
   const router = useRouter();
@@ -24,7 +25,8 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<DProduct | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>("");
-
+  const pdfGenerator = new ProductPDFGenerator();
+  const { getCurrentUser } = useAuth();
   const getProductDetails = async () => {
     try {
       const response = await fetchProductDetails(parseInt(params.id as string));
@@ -36,9 +38,16 @@ const ProductDetails = () => {
   useEffect(() => {
     console.log(params.id as string);
     getProductDetails();
-    getCurrentUser();
+    getCurrentUserData();
   }, [params.id]);
-
+  const getCurrentUserData = async () => {
+    const userId = await getCurrentUser();
+    if (userId) {
+      setCurrentUserId(userId);
+    } else {
+      router.push("/");
+    }
+  };
   const openMapsLocation = (latitude: number, longitude: number) => {
     const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
     Linking.openURL(url);
@@ -91,16 +100,6 @@ const ProductDetails = () => {
       setIsLoading(false);
     }
   };
-  const getCurrentUser = async () => {
-    try {
-      const userSecretKey = await AsyncStorage.getItem("userSecretKey");
-      if (userSecretKey) {
-        setCurrentUserId(userSecretKey);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
 
   const renderEditHistory = () => {
     return product?.editedBy.map((edit, index) => (
@@ -130,6 +129,15 @@ const ProductDetails = () => {
       </SafeAreaView>
     );
   }
+  const handleGeneratePDF = async () => {
+    if (!product) return;
+
+    try {
+      await pdfGenerator.generateAndSharePDF(product);
+    } catch (error) {
+      Alert.alert("Erreur", "Impossible de générer le PDF");
+    }
+  };
   return (
     <View className="flex-1 bg-gray-50">
       <Stack.Screen options={{ headerShown: false }} />
@@ -142,6 +150,18 @@ const ProductDetails = () => {
             <Text className="text-2xl font-bold text-gray-800">
               {product.name}
             </Text>
+            <TouchableOpacity
+              onPress={handleGeneratePDF}
+              className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
+            >
+              <Feather
+                name="file-text"
+                size={16}
+                color="white"
+                className="mr-2"
+              />
+              <Text className="text-white">Exporter PDF</Text>
+            </TouchableOpacity>
           </View>
 
           <View className="w-full h-64 bg-white p-4">

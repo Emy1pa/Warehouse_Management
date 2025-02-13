@@ -1,11 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { Product } from "@/app/utils/interface";
-
-interface ProductItemProps {
-  product: Product;
-}
+import { ProductItemProps } from "@/app/utils/interface";
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const router = useRouter();
