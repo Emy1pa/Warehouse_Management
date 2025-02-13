@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View, Image, ScrollView } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FilterSortUtils from "./SearchAndSort";
 import { Product } from "../utils/interface";
@@ -12,14 +19,36 @@ const ProductsList = () => {
   const { isAuthenticated, logout } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const loadProducts = async () => {
+  // useEffect(() => {
+  //   const loadProducts = async () => {
+  //     const data = await fetchProducts();
+  //     setProducts(data);
+  //   };
+  //   loadProducts();
+  //   setRefreshing(false);
+  // }, []);
+  const loadProducts = async () => {
+    try {
       const data = await fetchProducts();
       setProducts(data);
-    };
+    } catch (error) {
+      console.error("Error loading products:", error);
+    }
+  };
+  useEffect(() => {
     loadProducts();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await loadProducts();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     setFilteredProducts(products);
@@ -54,6 +83,9 @@ const ProductsList = () => {
           <ScrollView
             className="flex-1 pt- px-2"
             contentContainerStyle={{ gap: 12 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           >
             {filteredProducts.map((item) => (
               <ProductItem key={item.id} product={item} />

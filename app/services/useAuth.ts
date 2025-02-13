@@ -20,6 +20,16 @@ const useAuth = () => {
     await AsyncStorage.removeItem("userSecretKey");
     router.push("/");
   };
-  return { isAuthenticated, logout };
+  const getCurrentUser = async () => {
+    try {
+      const userSecretKey = await AsyncStorage.getItem("userSecretKey");
+      if (userSecretKey) {
+        return userSecretKey;
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+  return { isAuthenticated, logout, getCurrentUser };
 };
 export default useAuth;
