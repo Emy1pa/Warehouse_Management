@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,21 +8,12 @@ import {
   ScrollView,
   Modal,
   FlatList,
+  Dimensions,
 } from "react-native";
-import axios from "axios";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-interface ProductForm {
-  name: string;
-  type: string;
-  barcode: string;
-  price: string;
-  solde: string;
-  supplier: string;
-  image: string;
-  selectedStock: string;
-  quantity: string;
-}
+import { ProductForm } from "../utils/interface";
+import { addProduct } from "../services/productService";
+import useAuth from "../services/useAuth";
+import { Camera, CameraType, CameraView } from "expo-camera";
 
 export default function AddProductScreen() {
   const [formData, setFormData] = useState<ProductForm>({
@@ -36,6 +27,29 @@ export default function AddProductScreen() {
     selectedStock: "none",
     quantity: "",
   });
+  const { getCurrentUser } = useAuth();
+  const [scanning, setScanning] = useState(false);
+
+  const [facing, setFacing] = useState<CameraType>("back");
+  const [scanned, setScanned] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const screenHeight = Dimensions.get("window").height;
+  const handleBarCodeScanned = ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
+    setScanned(true);
+    handleChange("barcode", data);
+
+    alert(`Barcode scanned! Type: ${type}, Data: ${data}`);
+  };
+
+  function toggleCameraFacing() {
+    setFacing((current) => (current === "back" ? "front" : "back"));
+  }
 
   const [showStockPicker, setShowStockPicker] = useState(false);
 
@@ -85,56 +99,17 @@ export default function AddProductScreen() {
   };
 
   const handleAddProduct = async () => {
-    if (
-      !formData.name ||
-      !formData.type ||
-      !formData.barcode ||
-      !formData.price ||
-      !formData.supplier ||
-      !formData.image
-    ) {
-      Alert.alert("Error", "All fields are required except Solde!");
-      return;
-    }
-
     try {
-      const response = await axios.get("http://192.168.8.162:3000/products");
-      const products = response.data;
-      const nextId = Math.max(...products.map((p: any) => p.id)) + 1;
-
-      const stocks = [];
-      if (formData.selectedStock !== "none" && formData.quantity) {
-        const selectedStockData = availableStocks.find(
-          (stock) => stock.id.toString() === formData.selectedStock
-        );
-        if (selectedStockData) {
-          stocks.push({
-            ...selectedStockData,
-            quantity: parseInt(formData.quantity),
-          });
-        }
+      const userId = await getCurrentUser();
+      if (!userId) {
+        Alert.alert("Error", "Not authenticated!");
+        return;
       }
-
-      const newProduct = {
-        id: nextId,
-        name: formData.name,
-        type: formData.type,
-        barcode: formData.barcode,
-        price: parseFloat(formData.price),
-        solde: formData.solde ? parseFloat(formData.solde) : undefined,
-        supplier: formData.supplier,
-        image: formData.image,
-        stocks,
-        editedBy: [
-          {
-            warehousemanId: 1444,
-            at: new Date().toISOString().split("T")[0],
-          },
-        ],
-      };
-
-      await axios.post("http://192.168.8.162:3000/products", newProduct);
-      Alert.alert("Success", `Product "${formData.name}" added successfully!`);
+      const newProduct = await addProduct(formData, availableStocks, userId);
+      Alert.alert(
+        "Success",
+        `Product "${newProduct.name}" added successfully!`
+      );
 
       setFormData({
         name: "",
@@ -148,11 +123,25 @@ export default function AddProductScreen() {
         quantity: "",
       });
     } catch (error) {
-      console.error("Error adding product:", error);
-      Alert.alert("Error", "Failed to add product. Please try again.");
+      Alert.alert("Error", "Failed to add product.");
     }
   };
+  const startScanning = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    if (status === "granted") {
+      setScanning(true);
+    } else {
+      Alert.alert(
+        "Permission Required",
+        "Camera permission is required to scan barcodes"
+      );
+    }
+  };
+  // const handleBarCodeScanned = ({ data }: { data: string }) => {
+  //   handleChange("barcode", data);
 
+  //   setScanning(false);
+  // };
   return (
     <ScrollView className="flex-1 bg-gray-100">
       <View className="p-5 mt-8">
@@ -173,14 +162,67 @@ export default function AddProductScreen() {
           value={formData.type}
           onChangeText={(value) => handleChange("type", value)}
         />
+        <View className="mb-3">
+          <TextInput
+            className="w-full bg-white p-4 rounded-xl shadow"
+            placeholder="Barcode"
+            value={formData.barcode}
+            onChangeText={(value) => handleChange("barcode", value)}
+          />
 
-        <TextInput
-          className="w-full bg-white p-4 mb-3 rounded-xl shadow"
-          placeholder="Barcode"
-          value={formData.barcode}
-          onChangeText={(value) => handleChange("barcode", value)}
-        />
+          <TouchableOpacity
+            className="mt-2 bg-blue-600 p-4 rounded-xl shadow items-center justify-center"
+            onPress={() => (scanning ? setScanning(false) : startScanning())}
+          >
+            <Text className="text-white text-center">
+              {scanning ? "Cancel Scan" : "Scan Barcode"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
+        {scanning && (
+          <Modal visible={scanning} transparent={true} animationType="slide">
+            <View className="flex-1 bg-black">
+              <CameraView
+                facing={facing}
+                onBarcodeScanned={handleBarCodeScanned}
+                className="flex-1"
+                style={{
+                  width: screenWidth,
+                  height: screenHeight * 0.7,
+                }}
+              >
+                <View className="flex-1 bg-transparent">
+                  {/* Scanning overlay */}
+                  <View className="flex-1 items-center justify-center">
+                    <View className="w-64 h-64 border-2 border-white rounded-lg">
+                      <View className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500" />
+                      <View className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-blue-500" />
+                      <View className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-blue-500" />
+                      <View className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500" />
+                    </View>
+                  </View>
+
+                  {/* Controls */}
+                  <View className="absolute bottom-10 w-full flex-row justify-between px-10">
+                    <TouchableOpacity
+                      className="bg-white/20 p-4 rounded-full"
+                      onPress={toggleCameraFacing}
+                    >
+                      <Text className="text-white">Flip Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="bg-white/20 p-4 rounded-full"
+                      onPress={() => setScanning(false)}
+                    >
+                      <Text className="text-white">Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </CameraView>
+            </View>
+          </Modal>
+        )}
         <TextInput
           className="w-full bg-white p-4 mb-3 rounded-xl shadow"
           placeholder="Price (DH)"
@@ -253,6 +295,7 @@ export default function AddProductScreen() {
                   Select Stock Location
                 </Text>
               </View>
+              <CameraView></CameraView>
 
               <FlatList
                 data={[
