@@ -1,50 +1,87 @@
-# Welcome to your Expo app 👋
+# 📱 Application Mobile de Gestion de Stock
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 📋 Description
+Application mobile intuitive conçue pour simplifier la gestion des stocks en magasin. Elle permet aux magasiniers de gérer leurs produits en temps réel via un scanner de code-barres ou une saisie manuelle.
 
-## Get started
+## ✨ Fonctionnalités Principales
 
-1. Install dependencies
+### 🔐 Authentification
+- Système de connexion sécurisé avec code secret personnel
+- Gestion des sessions utilisateurs
 
-   ```bash
-   npm install
-   ```
+### 📦 Gestion des Produits
+- Scanner de code-barres intégré (expo-barcode-scanner)
+- Saisie manuelle des codes-barres
+- Gestion des quantités par entrepôt
+- Formulaire de création de nouveaux produits avec :
+  - Informations de base (nom, type, prix)
+  - Gestion des fournisseurs
+  - Upload d'images
+  - Gestion des quantités initiales
 
-2. Start the app
+### 📊 Interface de Gestion
+- Liste détaillée des produits avec indicateurs visuels
+- Système de filtrage et recherche avancé
+- Tri dynamique des produits
+- Tableau de bord avec statistiques en temps réel
 
-   ```bash
-    npx expo start
-   ```
+### 📈 Statistiques
+- Nombre total de produits
+- Inventaire par ville
+- Suivi des ruptures de stock
+- Valeur totale des stocks
+- Historique des mouvements récents
 
-In the output, you'll find options to open the app in a
+### 💾 Export et Sauvegarde
+- Génération de rapports PDF (expo-print)
+- Sauvegarde automatique des données
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠 Installation
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### Prérequis
 ```bash
-npm run reset-project
+# Installation de Node.js et npm
+# Minimum requis : Node.js v14+
+
+# Installation des dépendances globales
+npm install -g json-server
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Configuration Backend
+```bash
+# Cloner le repository
+git clone [https://github.com/Emy1pa/Warehouse_Management.git]
 
-## Learn more
+# Installation des dépendances
+cd [warehouseManagement]
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
+# Démarrer le serveur JSON
+npx json-server db.json
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Configuration Frontend
+```bash
+# Installation des dépendances frontend
+npm install
 
-## Join the community
+# Démarrer l'application
+npm start
+```
 
-Join our community of developers creating universal apps.
+## 🔧 Technologies Utilisées
+- React Native / Expo
+- JSON Server (Backend)
+- expo-barcode-scanner
+- expo-print
+- Autres dépendances (voir package.json)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🤝 Contribution
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -m 'Ajout d'une nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrir une Pull Request
+   
+---
+Développé avec ❤️ pour la gestion efficace des stocks en magasin
